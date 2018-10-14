@@ -2,8 +2,8 @@ import { EntryType } from './entry-type';
 import { Tag } from './tag';
 
 export interface BaseEntry<T extends EntryType> {
+  codeLocation: Iterable<string>;
   context: Iterable<string>;
-  location: Iterable<string>;
   tags: Set<Tag>;
   timestamp: number;
   type: T;
@@ -24,3 +24,5 @@ export interface ErrorEntry extends BaseEntry<EntryType.ERROR> {
 export interface WarningEntry extends BaseEntry<EntryType.WARNING> {
   message: string;
 }
+
+export type Entry<E> = DebugEntry|EventEntry<E>|ErrorEntry|WarningEntry;

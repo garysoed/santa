@@ -46,7 +46,7 @@ export class Logger<E> {
 
     return {
       context: this.context_,
-      location: this.codeLocation_,
+      codeLocation: this.codeLocation_,
       tags: tagsSet,
       timestamp: Date.now(),
       type,
