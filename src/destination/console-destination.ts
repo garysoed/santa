@@ -17,7 +17,7 @@ export class ConsoleDestination<E> implements Destination {
 
         return `${error.message}\n${error.stack}`;
       case EntryType.EVENT:
-        return this.eventTypeConverter_.convertTo(entry.eventType);
+        return this.eventTypeConverter_.convertBackward(entry.eventType);
       case EntryType.WARNING:
         return entry.message;
     }

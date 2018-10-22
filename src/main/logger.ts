@@ -1,8 +1,8 @@
-import { ImmutableList, ImmutableMap, ImmutableSet } from 'gs-tools/export/collect';
-import { BaseEntry, DebugEntry, EventEntry } from '../component/entry';
+import { ImmutableList, ImmutableMap } from 'gs-tools/export/collect';
+import { BaseEntry } from '../component/entry';
 import { EntryType } from '../component/entry-type';
 import { Tag } from '../component/tag';
-import { Destination } from '../destination/destination';
+import { logDestination } from './log-destination';
 
 interface StackModifier<E> {
   pop(): Logger<E>;
@@ -19,7 +19,6 @@ export class Logger<E> {
   constructor(
       private readonly codeLocation_: ImmutableList<string>,
       private readonly context_: ImmutableList<string>,
-      private readonly destination_: Destination,
       private readonly tags_: ImmutableMap<string, string|null>) { }
 
   context(): StackModifier<E> {
@@ -27,12 +26,10 @@ export class Logger<E> {
       pop: () => new Logger(
           this.codeLocation_,
           this.context_.pop(),
-          this.destination_,
           this.tags_),
       push: (entry: string) => new Logger(
           this.codeLocation_,
           this.context_.push(entry),
-          this.destination_,
           this.tags_),
     };
   }
@@ -45,8 +42,8 @@ export class Logger<E> {
     }
 
     return {
-      context: this.context_,
       codeLocation: this.codeLocation_,
+      context: this.context_,
       tags: tagsSet,
       timestamp: Date.now(),
       type,
@@ -58,7 +55,7 @@ export class Logger<E> {
       ...this.createBaseEntry_(EntryType.DEBUG),
       message,
     };
-    this.destination_.log(debugEntry);
+    logDestination.get().log(debugEntry);
   }
 
   error(errorObj: Error): void {
@@ -66,7 +63,7 @@ export class Logger<E> {
       ...this.createBaseEntry_(EntryType.ERROR),
       error: errorObj,
     };
-    this.destination_.log(errorEntry);
+    logDestination.get().log(errorEntry);
   }
 
   event(eventType: E): void {
@@ -74,7 +71,7 @@ export class Logger<E> {
       ...this.createBaseEntry_(EntryType.EVENT),
       eventType,
     };
-    this.destination_.log(eventEntry);
+    logDestination.get().log(eventEntry);
   }
 
   location(): StackModifier<E> {
@@ -82,12 +79,10 @@ export class Logger<E> {
       pop: () => new Logger(
           this.codeLocation_.pop(),
           this.context_,
-          this.destination_,
           this.tags_),
       push: (entry: string) => new Logger(
           this.codeLocation_.push(entry),
           this.context_,
-          this.destination_,
           this.tags_),
     };
   }
@@ -97,12 +92,10 @@ export class Logger<E> {
       pop: () => new Logger(
           this.codeLocation_,
           this.context_,
-          this.destination_,
           this.tags_.deleteKey(key)),
       push: (value?: string) => new Logger(
           this.codeLocation_,
           this.context_,
-          this.destination_,
           this.tags_.set(key, value || null)),
     };
   }
@@ -112,6 +105,6 @@ export class Logger<E> {
       ...this.createBaseEntry_(EntryType.WARNING),
       message,
     };
-    this.destination_.log(warningEntry);
+    logDestination.get().log(warningEntry);
   }
 }
