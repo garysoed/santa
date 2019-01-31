@@ -1,4 +1,4 @@
-import { Converter } from 'gs-tools/export/converter';
+import { Converter } from 'nabu/export/main';
 import { Entry } from '../component/entry';
 import { EntryType } from '../component/entry-type';
 import { Destination } from './destination';
@@ -17,7 +17,9 @@ export class ConsoleDestination<E> implements Destination {
 
         return `${error.message}\n${error.stack}`;
       case EntryType.EVENT:
-        return this.eventTypeConverter_.convertBackward(entry.eventType);
+        const result = this.eventTypeConverter_.convertBackward(entry.eventType);
+
+        return result.success ? result.result : `${entry.toString()}`;
       case EntryType.WARNING:
         return entry.message;
     }

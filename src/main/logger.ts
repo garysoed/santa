@@ -1,8 +1,9 @@
-import { ImmutableList, ImmutableMap } from 'gs-tools/export/collect';
 import { BaseEntry } from '../component/entry';
 import { EntryType } from '../component/entry-type';
 import { Tag } from '../component/tag';
 import { logDestination } from './log-destination';
+
+const CONTEXT: string[] = [];
 
 interface StackModifier<E> {
   pop(): Logger<E>;
@@ -17,20 +18,21 @@ interface TagSetModifier<E> {
 export class Logger<E> {
 
   constructor(
-      private readonly codeLocation_: ImmutableList<string>,
-      private readonly context_: ImmutableList<string>,
-      private readonly tags_: ImmutableMap<string, string|null>) { }
+      private readonly codeLocation_: string[],
+      private readonly tags_: Map<string, string|null>) { }
 
   context(): StackModifier<E> {
     return {
-      pop: () => new Logger(
-          this.codeLocation_,
-          this.context_.pop(),
-          this.tags_),
-      push: (entry: string) => new Logger(
-          this.codeLocation_,
-          this.context_.push(entry),
-          this.tags_),
+      pop: () => {
+        CONTEXT.pop();
+
+        return this;
+      },
+      push: (entry: string) => {
+        CONTEXT.push(entry);
+
+        return this;
+      },
     };
   }
 
@@ -43,7 +45,7 @@ export class Logger<E> {
 
     return {
       codeLocation: this.codeLocation_,
-      context: this.context_,
+      context: [...CONTEXT],
       tags: tagsSet,
       timestamp: Date.now(),
       type,
@@ -76,27 +78,35 @@ export class Logger<E> {
 
   location(): StackModifier<E> {
     return {
-      pop: () => new Logger(
-          this.codeLocation_.pop(),
-          this.context_,
-          this.tags_),
-      push: (entry: string) => new Logger(
-          this.codeLocation_.push(entry),
-          this.context_,
-          this.tags_),
+      pop: () => {
+        const newLocation = [...this.codeLocation_];
+        newLocation.pop();
+
+        return new Logger(newLocation, this.tags_);
+      },
+      push: (entry: string) => {
+        const newLocation = [...this.codeLocation_];
+        newLocation.push(entry);
+
+        return new Logger(newLocation, this.tags_);
+      },
     };
   }
 
   tag(key: string): TagSetModifier<E> {
     return {
-      pop: () => new Logger(
-          this.codeLocation_,
-          this.context_,
-          this.tags_.deleteKey(key)),
-      push: (value?: string) => new Logger(
-          this.codeLocation_,
-          this.context_,
-          this.tags_.set(key, value || null)),
+      pop: () => {
+        const newTags = new Map([...this.tags_]);
+        newTags.delete(key);
+
+        return new Logger(this.codeLocation_, newTags);
+      },
+      push: (value: string = null) => {
+        const newTags = new Map([...this.tags_]);
+        newTags.set(key, value);
+
+        return new Logger(this.codeLocation_, newTags);
+      },
     };
   }
 
