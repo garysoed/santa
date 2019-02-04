@@ -5,23 +5,23 @@ import { logDestination } from './log-destination';
 
 const CONTEXT: string[] = [];
 
-interface StackModifier<E> {
-  pop(): Logger<E>;
-  push(entry: string): Logger<E>;
+interface StackModifier {
+  pop(): Logger;
+  push(entry: string): Logger;
 }
 
-interface TagSetModifier<E> {
-  pop(): Logger<E>;
-  push(value?: string): Logger<E>;
+interface TagSetModifier {
+  pop(): Logger;
+  push(value?: string): Logger;
 }
 
-export class Logger<E> {
+export class Logger {
 
   constructor(
       private readonly codeLocation_: string[],
       private readonly tags_: Map<string, string|null>) { }
 
-  context(): StackModifier<E> {
+  context(): StackModifier {
     return {
       pop: () => {
         CONTEXT.pop();
@@ -44,7 +44,7 @@ export class Logger<E> {
     }
 
     return {
-      codeLocation: this.codeLocation_,
+      codeLocation: [...this.codeLocation_],
       context: [...CONTEXT],
       tags: tagsSet,
       timestamp: Date.now(),
@@ -68,7 +68,7 @@ export class Logger<E> {
     logDestination.get().log(errorEntry);
   }
 
-  event(eventType: E): void {
+  event(eventType: string): void {
     const eventEntry = {
       ...this.createBaseEntry_(EntryType.EVENT),
       eventType,
@@ -76,7 +76,17 @@ export class Logger<E> {
     logDestination.get().log(eventEntry);
   }
 
-  location(): StackModifier<E> {
+  functionCall<R, A extends any[]>(key: string, fn: (...args: A) => R): (...args: A) => R {
+    return (...args: A): R => {
+      this.debug(key);
+      const rv = fn(...args);
+      this.debug(`${key}-end`);
+
+      return rv;
+    };
+  }
+
+  location(): StackModifier {
     return {
       pop: () => {
         const newLocation = [...this.codeLocation_];
@@ -93,7 +103,7 @@ export class Logger<E> {
     };
   }
 
-  tag(key: string): TagSetModifier<E> {
+  tag(key: string): TagSetModifier {
     return {
       pop: () => {
         const newTags = new Map([...this.tags_]);
@@ -101,7 +111,7 @@ export class Logger<E> {
 
         return new Logger(this.codeLocation_, newTags);
       },
-      push: (value: string = null) => {
+      push: (value: string|null = null) => {
         const newTags = new Map([...this.tags_]);
         newTags.set(key, value);
 

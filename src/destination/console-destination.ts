@@ -3,12 +3,12 @@ import { Entry } from '../component/entry';
 import { EntryType } from '../component/entry-type';
 import { Destination } from './destination';
 
-export class ConsoleDestination<E> implements Destination {
+export class ConsoleDestination implements Destination {
   private timestamp_: number|null = null;
 
-  constructor(private readonly eventTypeConverter_: Converter<string, E>) { }
+  constructor() { }
 
-  private getText_(entry: Entry<E>): string {
+  private getText_(entry: Entry): string {
     switch (entry.type) {
       case EntryType.DEBUG:
         return entry.message;
@@ -17,9 +17,7 @@ export class ConsoleDestination<E> implements Destination {
 
         return `${error.message}\n${error.stack}`;
       case EntryType.EVENT:
-        const result = this.eventTypeConverter_.convertBackward(entry.eventType);
-
-        return result.success ? result.result : `${entry.toString()}`;
+        return `${entry.eventType}`;
       case EntryType.WARNING:
         return entry.message;
     }
@@ -40,7 +38,7 @@ export class ConsoleDestination<E> implements Destination {
     return `${diffSec}s`;
   }
 
-  log(entry: Entry<E>): void {
+  log(entry: Entry): void {
     const codeLocationArray = [...entry.codeLocation];
     const logo = getLogo_(entry.type);
     const codeLocation = codeLocationArray.join('.');
@@ -48,7 +46,9 @@ export class ConsoleDestination<E> implements Destination {
     const time = this.getTime_(entry.timestamp);
     const color = COLORS[getColorIndex_(codeLocationArray)];
     const method = getLoggingMethod_(entry.type);
+    this.timestamp_ = entry.timestamp;
     method.call(
+        console,
         `%c${logo} [${codeLocation}] ${text} (+${time})%c`,
         `color: ${color}`,
         `color: default`);

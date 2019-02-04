@@ -13,8 +13,8 @@ export interface DebugEntry extends BaseEntry<EntryType.DEBUG> {
   message: string;
 }
 
-export interface EventEntry<E> extends BaseEntry<EntryType.EVENT> {
-  eventType: E;
+export interface EventEntry extends BaseEntry<EntryType.EVENT> {
+  eventType: string;
 }
 
 export interface ErrorEntry extends BaseEntry<EntryType.ERROR> {
@@ -25,4 +25,4 @@ export interface WarningEntry extends BaseEntry<EntryType.WARNING> {
   message: string;
 }
 
-export type Entry<E> = DebugEntry|EventEntry<E>|ErrorEntry|WarningEntry;
+export type Entry = DebugEntry|EventEntry|ErrorEntry|WarningEntry;
