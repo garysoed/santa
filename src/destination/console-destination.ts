@@ -1,29 +1,12 @@
-import { Converter } from 'nabu/export/main';
+import { stringify, Verbosity } from 'moirai/export';
 import { Entry } from '../component/entry';
-import { EntryType } from '../component/entry-type';
+import { LogLevel } from '../component/log-level';
 import { Destination } from './destination';
 
 export class ConsoleDestination implements Destination {
   private timestamp_: number|null = null;
 
-  constructor() { }
-
-  private getText_(entry: Entry): string {
-    switch (entry.type) {
-      case EntryType.DEBUG:
-        return entry.message;
-      case EntryType.ERROR:
-        const error = entry.error;
-
-        return `${error.message}\n${error.stack}`;
-      case EntryType.EVENT:
-        return `${entry.eventType}`;
-      case EntryType.WARNING:
-        return entry.message;
-    }
-  }
-
-  private getTime_(timestamp: number): string {
+  private getTime(timestamp: number): string {
     if (this.timestamp_ === null) {
       return '0';
     }
@@ -40,22 +23,20 @@ export class ConsoleDestination implements Destination {
 
   log(entry: Entry): void {
     const codeLocationArray = [...entry.codeLocation];
-    const logo = getLogo_(entry.type);
     const codeLocation = codeLocationArray.join('.');
-    const text = this.getText_(entry);
-    const time = this.getTime_(entry.timestamp);
-    const color = COLORS[getColorIndex_(codeLocationArray)];
-    const method = getLoggingMethod_(entry.type);
-    this.timestamp_ = entry.timestamp;
+    const time = this.getTime(entry.timestampMs);
+    const color = COLORS[getColorIndex(codeLocationArray)];
+    const method = getLoggingMethod(entry.level);
+    this.timestamp_ = entry.timestampMs;
     method.call(
         console,
-        `%c${logo} [${codeLocation}] ${text} (+${time})%c`,
-        `color: ${color}`,
+        `%c[${codeLocation}] ${entry.key}: ${stringify(entry.value, Verbosity.DEBUG)} (+${time})%c`,
+        `color: #${color}`,
         `color: default`);
   }
 }
 
-function getColorIndex_(codeLocation: string[]): number {
+function getColorIndex(codeLocation: string[]): number {
   const lastSegment = codeLocation[codeLocation.length - 1];
   if (!lastSegment) {
     return 0;
@@ -70,35 +51,24 @@ function getColorIndex_(codeLocation: string[]): number {
 
   const prevLocation = [...codeLocation];
   prevLocation.pop();
-  const prevHash = getColorIndex_(prevLocation);
+  const prevHash = getColorIndex(prevLocation);
 
   return (hash + prevHash) % COLORS.length;
 }
 
-function getLogo_(type: EntryType): string {
-  switch (type) {
-    case EntryType.DEBUG:
-      return `?`;
-    case EntryType.ERROR:
-      return `‼`;
-    case EntryType.WARNING:
-      return `!`;
-    case EntryType.EVENT:
-      return `i`;
-  }
-}
-
 type ConsoleMethod = (this: Console, message?: any, ...optionalParams: any[]) => void;
-function getLoggingMethod_(type: EntryType): ConsoleMethod {
-  switch (type) {
-    case EntryType.DEBUG:
+function getLoggingMethod(logLevel: LogLevel): ConsoleMethod {
+  switch (logLevel) {
+    case LogLevel.DEBUG:
       return console.debug;
-    case EntryType.ERROR:
+    case LogLevel.ERROR:
       return console.error;
-    case EntryType.WARNING:
-      return console.warn;
-    case EntryType.EVENT:
+    case LogLevel.INFO:
       return console.info;
+    case LogLevel.LOG:
+      return console.log;
+    case LogLevel.WARNING:
+      return console.warn;
   }
 }
 

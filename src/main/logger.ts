@@ -20,12 +20,12 @@ export class Logger {
 
   get context(): ContextModifier {
     return {
-      pop() {
+      pop: () => {
         CONTEXT.pop();
 
         return this;
       },
-      push(entry: Tag) {
+      push: (entry: Tag) => {
         CONTEXT.push(entry);
 
         return this;
