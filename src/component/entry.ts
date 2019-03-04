@@ -1,28 +1,14 @@
-import { EntryType } from './entry-type';
+import { LogLevel } from './log-level';
 import { Tag } from './tag';
 
-export interface BaseEntry<T extends EntryType> {
+/**
+ * Entry in the log.
+ */
+export interface Entry {
   codeLocation: Iterable<string>;
-  context: Iterable<string>;
-  tags: Set<Tag>;
-  timestamp: number;
-  type: T;
+  context: Tag[];
+  key: string;
+  level: LogLevel;
+  timestampMs: number;
+  value: unknown;
 }
-
-export interface DebugEntry extends BaseEntry<EntryType.DEBUG> {
-  message: string;
-}
-
-export interface EventEntry extends BaseEntry<EntryType.EVENT> {
-  eventType: string;
-}
-
-export interface ErrorEntry extends BaseEntry<EntryType.ERROR> {
-  error: Error;
-}
-
-export interface WarningEntry extends BaseEntry<EntryType.WARNING> {
-  message: string;
-}
-
-export type Entry = DebugEntry|EventEntry|ErrorEntry|WarningEntry;
