@@ -1,4 +1,4 @@
-import { stringify, Verbosity } from 'moirai/export';
+import { stringify, Verbosity } from '@moirai';
 import { Entry } from '../component/entry';
 import { LogLevel } from '../component/log-level';
 import { Destination } from './destination';
