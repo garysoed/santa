@@ -23,6 +23,11 @@ export enum LogLevel {
    */
   PROGRESS,
   /**
+   * Miscellaneous information. Unlike progress, this is usually the result of running a command,
+   * or the starting point of a process, that is purely informational.
+   */
+  INFO,
+  /**
    * General information, only used for debugging.
    */
   DEBUG,
