@@ -52,8 +52,8 @@ export class Logger {
     logDestination.get().log(this.createEntry(LogLevel.ERROR, errorObj.message, errorObj));
   }
 
-  info(key: string, value: unknown): void {
-    logDestination.get().log(this.createEntry(LogLevel.INFO, key, value));
+  failure(key: string, value: unknown): void {
+    logDestination.get().log(this.createEntry(LogLevel.FAILURE, key, value));
   }
 
   get location(): LocationModifier {
@@ -73,8 +73,12 @@ export class Logger {
     };
   }
 
-  log(key: string, value: unknown): void {
-    logDestination.get().log(this.createEntry(LogLevel.LOG, key, value));
+  progress(key: string, value: unknown): void {
+    logDestination.get().log(this.createEntry(LogLevel.PROGRESS, key, value));
+  }
+
+  success(key: string, value: unknown): void {
+    logDestination.get().log(this.createEntry(LogLevel.SUCCESS, key, value));
   }
 
   warn(key: string, value: unknown): void {
