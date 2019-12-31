@@ -1,92 +1,51 @@
 import { Entry } from '../component/entry';
 import { LogLevel } from '../component/log-level';
-import { Tag } from '../component/tag';
+import { Destination } from '../destination/destination';
 
-import { logDestination } from './log-destination';
+const CONTEXT: Map<string, string> = new Map();
 
-const CONTEXT: Tag[] = [];
-
-interface LocationModifier {
-  pop(): Logger;
-  push(entry: string): Logger;
+interface ContextChange {
+  type: 'add'|'delete';
+  key: string;
+  value: string;
 }
 
-interface ContextModifier {
-  pop(): Logger;
-  push(tag: Tag): Logger;
+interface NewEntry {
+  readonly contextChange?: ContextChange;
+  readonly level: LogLevel;
+  readonly value: unknown;
 }
 
 export class Logger {
+  constructor(
+      private readonly destinations: ReadonlySet<Destination>,
+      private readonly key: string,
+  ) {}
 
-  get context(): ContextModifier {
-    return {
-      pop: () => {
-        CONTEXT.pop();
+  log(newEntry: NewEntry): void {
+    // Adds the context BEFORE logging.
+    if (newEntry.contextChange && newEntry.contextChange.type === 'add') {
+      CONTEXT.set(newEntry.contextChange.key, newEntry.contextChange.value);
+    }
 
-        return this;
-      },
-      push: (entry: Tag) => {
-        CONTEXT.push(entry);
-
-        return this;
-      },
-    };
-  }
-
-  get location(): LocationModifier {
-    return {
-      pop: () => {
-        const newLocation = [...this.codeLocation];
-        newLocation.pop();
-
-        return new Logger(newLocation);
-      },
-      push: (entry: string) => {
-        const newLocation = [...this.codeLocation];
-        newLocation.push(entry);
-
-        return new Logger(newLocation);
-      },
-    };
-  }
-  constructor(private readonly codeLocation: string[]) { }
-
-  debug(key: string, value: unknown): void {
-    logDestination.get().log(this.createEntry(LogLevel.DEBUG, key, value));
-  }
-
-  error(errorObj: Error): void {
-    logDestination.get().log(this.createEntry(LogLevel.ERROR, errorObj.message, errorObj));
-  }
-
-  failure(key: string, value: unknown): void {
-    logDestination.get().log(this.createEntry(LogLevel.FAILURE, key, value));
-  }
-
-  info(key: string, value: unknown): void {
-    logDestination.get().log(this.createEntry(LogLevel.INFO, key, value));
-  }
-
-  progress(key: string, value: unknown): void {
-    logDestination.get().log(this.createEntry(LogLevel.PROGRESS, key, value));
-  }
-
-  success(key: string, value: unknown): void {
-    logDestination.get().log(this.createEntry(LogLevel.SUCCESS, key, value));
-  }
-
-  warn(key: string, value: unknown): void {
-    logDestination.get().log(this.createEntry(LogLevel.WARNING, key, value));
-  }
-
-  private createEntry(level: LogLevel, key: string, value: unknown): Entry {
-    return {
-      codeLocation: [...this.codeLocation],
-      context: [...CONTEXT],
-      key,
-      level,
+    const entry: Entry = {
+      ...newEntry,
+      context: CONTEXT,
+      key: this.key,
       timestampMs: Date.now(),
-      value,
     };
+
+    for (const destination of this.destinations) {
+      destination.log(entry);
+    }
+
+    // Removes the context AFTER logging.
+    if (newEntry.contextChange && newEntry.contextChange.type === 'delete') {
+      CONTEXT.set(newEntry.contextChange.key, newEntry.contextChange.value);
+    }
+  }
+
+  withKey(key: string): Logger {
+    return new Logger(this.destinations, key);
   }
 }
