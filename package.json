@@ -15,5 +15,11 @@
   "bugs": {
     "url": "https://github.com/garysoed/santa/issues"
   },
-  "homepage": "https://github.com/garysoed/santa#readme"
+  "homepage": "https://github.com/garysoed/santa#readme",
+  "dependencies": {
+    "chalk": "^3.0.0"
+  },
+  "devDependencies": {
+    "@types/chalk": "^2.2.0"
+  }
 }
