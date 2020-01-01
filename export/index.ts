@@ -1,4 +1,3 @@
-export { Destination } from '../src/destination/destination';
 export { ConsoleDestination } from '../src/destination/console-destination';
 
 export { Logger } from '../src/main/logger';

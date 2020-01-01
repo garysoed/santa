@@ -1,12 +1,16 @@
+import { Subject } from 'rxjs';
+
 import { Entry } from '../component/entry';
 import { LogLevel } from '../component/log-level';
 import { Destination } from '../destination/destination';
 
+export const ON_LOG_$ = new Subject<Entry>();
+
 const CONTEXT: Map<string, string> = new Map();
 
 interface ContextChange {
-  type: 'add'|'delete';
   key: string;
+  type: 'add'|'delete';
   value: string;
 }
 
@@ -35,9 +39,7 @@ export class Logger {
       timestampMs: Date.now(),
     };
 
-    for (const destination of this.destinations) {
-      destination.log(entry);
-    }
+    ON_LOG_$.next(entry);
 
     // Removes the context AFTER logging.
     if (newEntry.contextChange && newEntry.contextChange.type === 'delete') {
