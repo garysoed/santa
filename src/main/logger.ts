@@ -31,7 +31,26 @@ export class Logger {
   constructor(private readonly key: string) {}
 
   error(error: Error): void {
-    this.log({level: LogLevel.ERROR, value: error.stack || error.message});
+    let value: string;
+    if (error.stack) {
+      value = error.stack
+          .split('\n')
+          .map((line, index) => {
+            if (index <= 0) {
+              return line;
+            }
+
+            return line.replace(
+                /^( )*/,
+                match => {
+                  return match.replace(/ /g, '.');
+                });
+          })
+          .join('\n');
+    } else {
+      value = error.message;
+    }
+    this.log({level: LogLevel.ERROR, value});
   }
 
   info(value: RawValue): void {

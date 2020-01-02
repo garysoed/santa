@@ -1,10 +1,13 @@
 import columnify from 'columnify';
 import commandLineUsage from 'command-line-usage';
+import process from 'process';
 
 import { Value } from '../../component/entry';
 import { LogLevel } from '../../component/log-level';
 import { getSymbol } from '../get-symbol';
 import { STRING_TABLE_TYPE } from '../string-table-type';
+
+import { colorize } from './colorize';
 
 
 interface RenderedRow {
@@ -14,9 +17,13 @@ interface RenderedRow {
 
 function formatRows(rows: ReadonlyArray<readonly string[]>, type: LogLevel): string {
   const renderedRows: RenderedRow[] = [];
+  const cellMaxLengths: number[] = [];
   for (const cells of rows) {
     const renderedRow: RenderedRow = {prefix: `[${getSymbol(type)}]`};
     for (let c = 0; c < cells.length; c++) {
+      const cell = cells[c];
+      const maxLength = cellMaxLengths[c] || 0;
+      cellMaxLengths[c] = Math.max(maxLength, cell.length);
       renderedRow[c] = cells[c];
     }
     renderedRows.push(renderedRow);
@@ -28,7 +35,25 @@ function formatRows(rows: ReadonlyArray<readonly string[]>, type: LogLevel): str
     numberColumns.push(`${i}`);
   }
 
-  return columnify(renderedRows, {showHeaders: false, columns: ['prefix', ...numberColumns]});
+  // Compute the maxWidths by: cellMaxLength / totalCellMaxLength * (cliWidth - 4)
+  const totalCellMaxLength = cellMaxLengths.reduce((sum, current) => sum + current, 0);
+  const cliWidth = process.stdout.columns - 4;
+  const config: Record<number, columnify.Options> = {};
+  for (let i = 0; i < cellMaxLengths.length; i++) {
+    config[i] = {maxWidth: Math.floor(cellMaxLengths[i] / totalCellMaxLength * cliWidth)};
+  }
+
+  return colorize(
+      type,
+      columnify(
+          renderedRows,
+          {
+            columns: ['prefix', ...numberColumns],
+            config,
+            preserveNewLines: true,
+            showHeaders: false,
+          }),
+  );
 }
 
 
