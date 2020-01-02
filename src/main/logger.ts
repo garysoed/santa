@@ -1,8 +1,12 @@
-import { Subject } from 'rxjs';
+import commandLineUsage from 'command-line-usage';
 
-import { Entry } from '../component/entry';
+import { ArrayOfType, StringType, Type } from '@gs-types';
+import { Subject } from '@rxjs';
+
+import { Entry, Value } from '../component/entry';
 import { LogLevel } from '../component/log-level';
-import { Destination } from '../destination/destination';
+import { STRING_TABLE_TYPE } from '../util/string-table-type';
+
 
 export const ON_LOG_$ = new Subject<Entry>();
 
@@ -14,17 +18,25 @@ interface ContextChange {
   value: string;
 }
 
+type RawValue = string|readonly string[]|
+    ReadonlyArray<readonly string[]>|commandLineUsage.Section[];
+
 interface NewEntry {
   readonly contextChange?: ContextChange;
   readonly level: LogLevel;
-  readonly value: unknown;
+  readonly value: RawValue;
 }
 
 export class Logger {
-  constructor(
-      private readonly destinations: ReadonlySet<Destination>,
-      private readonly key: string,
-  ) {}
+  constructor(private readonly key: string) {}
+
+  error(error: Error): void {
+    this.log({level: LogLevel.ERROR, value: error.stack || error.message});
+  }
+
+  info(value: RawValue): void {
+    this.log({level: LogLevel.INFO, value});
+  }
 
   log(newEntry: NewEntry): void {
     // Adds the context BEFORE logging.
@@ -32,11 +44,14 @@ export class Logger {
       CONTEXT.set(newEntry.contextChange.key, newEntry.contextChange.value);
     }
 
+    const value = normalizeValue(newEntry.value);
+
     const entry: Entry = {
       ...newEntry,
       context: CONTEXT,
       key: this.key,
       timestampMs: Date.now(),
+      value,
     };
 
     ON_LOG_$.next(entry);
@@ -47,7 +62,29 @@ export class Logger {
     }
   }
 
-  withKey(key: string): Logger {
-    return new Logger(this.destinations, key);
+  progress(value: RawValue): void {
+    this.log({level: LogLevel.PROGRESS, value});
   }
+
+  success(value: RawValue): void {
+    this.log({level: LogLevel.SUCCESS, value});
+  }
+}
+
+const STRING_ARRAY_TYPE: Type<readonly string[]> = ArrayOfType(StringType);
+
+function normalizeValue(raw: RawValue): Value {
+  if (typeof raw === 'string') {
+    return raw.split('\n').map(row => [row]);
+  }
+
+  if (STRING_ARRAY_TYPE.check(raw)) {
+    return raw.map(row => [row]);
+  }
+
+  if (STRING_TABLE_TYPE.check(raw)) {
+    return raw;
+  }
+
+  return raw;
 }

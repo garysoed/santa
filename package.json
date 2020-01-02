@@ -17,10 +17,15 @@
   },
   "homepage": "https://github.com/garysoed/santa#readme",
   "dependencies": {
+    "@types/node": "^13.1.2",
     "chalk": "^3.0.0",
+    "command-line-usage": "^6.1.0",
     "rxjs": "^6.5.4"
   },
   "devDependencies": {
-    "@types/chalk": "^2.2.0"
+    "@types/chalk": "^2.2.0",
+    "@types/columnify": "^1.5.0",
+    "@types/command-line-usage": "^5.0.1",
+    "columnify": "^1.5.4"
   }
 }

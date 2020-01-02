@@ -1,52 +1,48 @@
+import columnify from 'columnify';
+import commandLineUsage from 'command-line-usage';
+
+import { Value } from '../../component/entry';
 import { LogLevel } from '../../component/log-level';
 import { getSymbol } from '../get-symbol';
+import { STRING_TABLE_TYPE } from '../string-table-type';
 
-import { colorize } from './colorize';
 
-const COL_WIDTH = 80;
-const PREFIX_WIDTH = 4;
-const INDENT = '  ';
-
-function formatLine(prefix: string, text: string, pad: string): string {
-  return `${prefix} ${pad}${text}`;
+interface RenderedRow {
+  readonly prefix: string;
+  [key: number]: string;
 }
 
-function formatMessageLine(type: LogLevel, text: string, indent: number = 0): string {
-  const textWidth = COL_WIDTH - PREFIX_WIDTH - indent * INDENT.length;
-
-  // Split the text into multiple lines.
-  const lines = [];
-  const spacePrefix = text.match(/^( )*/)![0];
-  const segments = text.split(' ');
-  let line = '';
-  for (const segment of segments) {
-    if (line.length + segment.length + 1 > textWidth) {
-      lines.push(line);
-      line = segment;
-    } else {
-      const pad = line.length > 0 ? ' ' : '';
-      line += `${pad}${segment}`;
+function formatRows(rows: ReadonlyArray<readonly string[]>, type: LogLevel): string {
+  const renderedRows: RenderedRow[] = [];
+  for (const cells of rows) {
+    const renderedRow: RenderedRow = {prefix: `[${getSymbol(type)}]`};
+    for (let c = 0; c < cells.length; c++) {
+      renderedRow[c] = cells[c];
     }
+    renderedRows.push(renderedRow);
   }
 
-  if (line.length > 0) {
-    lines.push(line);
+  const maxCols = rows.map(row => row.length).reduce((max, current) => Math.max(max, current), 0);
+  const numberColumns = [];
+  for (let i = 0; i < maxCols; i++) {
+    numberColumns.push(`${i}`);
   }
 
-  let pad = spacePrefix;
-  for (let i = 0; i < indent; i++) {
-    pad += INDENT;
-  }
-
-  const [firstLine, ...restLines] = lines;
-  const rendered = [
-    formatLine(`[${getSymbol(type)}]`, firstLine || '', pad),
-    ...restLines.map(line => formatLine(`   `, line, pad)),
-  ];
-
-  return rendered.map(line => colorize(type, line)).join('\n');
+  return columnify(renderedRows, {showHeaders: false, columns: ['prefix', ...numberColumns]});
 }
 
-export function formatMessage(type: LogLevel, text: string, indent: number = 0): string {
-  return text.split('\n').map(line => formatMessageLine(type, line, indent)).join('\n');
+
+/**
+ * Formats message to be shown on the CLI.
+ *
+ * If the message is a table of strings, format the string as columns, each with a prefix.
+ * If the * message is an array of commandLineUsage Sections, they will be passed to
+ * commandLineUsage with the appended prefix.
+ */
+export function formatMessage(type: LogLevel, message: Value): string {
+  if (STRING_TABLE_TYPE.check(message)) {
+    return formatRows(message, type);
+  }
+
+  return commandLineUsage(message);
 }

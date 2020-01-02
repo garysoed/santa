@@ -1,0 +1,31 @@
+{
+  "compilerOptions": {
+    "alwaysStrict": true,
+    "baseUrl": ".",
+    "esModuleInterop": true,
+    "experimentalDecorators": true,
+    "lib": [
+      "dom",
+      "es2015",
+      "es2020.string"
+    ],
+    "module": "commonjs",
+    "noImplicitAny": true,
+    "noImplicitReturns": true,
+    "noImplicitThis": true,
+    "outDir": "out",
+    "paths": {
+      "@gs-types": ["node_modules/gs-types/export/index.ts"],
+      "@rxjs": ["node_modules/rxjs"],
+      "@rxjs/operators": ["node_modules/rxjs/operators"],
+    },
+    "pretty": true,
+    "sourceMap": true,
+    "strict": true,
+    "strictFunctionTypes": true,
+    "target": "es6"
+  },
+  "include": [
+    "src/**/*.ts",
+  ]
+}

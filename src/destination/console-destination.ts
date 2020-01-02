@@ -1,24 +1,34 @@
-import { Entry } from '../component/entry';
-import { LogLevel } from '../component/log-level';
+import { Entry, Value } from '../component/entry';
 import { formatMessage } from '../util/cli/format-message';
+import { STRING_TABLE_TYPE } from '../util/string-table-type';
 
 import { Destination } from './destination';
 
+
+interface Options {
+  readonly showKey: boolean;
+}
+
 export class ConsoleDestination implements Destination {
+  private readonly options = applyOptions(this.inputOptions);
+
+  constructor(private readonly inputOptions: Partial<Options> = {}) {}
+
   log(entry: Entry): void {
     // tslint:disable-next-line:no-console
-    console.log(getFormattedMessage(entry));
+    console.log(formatMessage(entry.level, this.getMessageString(entry)));
+  }
+
+  private getMessageString(entry: Entry): Value {
+    if (this.options.showKey && STRING_TABLE_TYPE.check(entry.value)) {
+      return entry.value.map(cells => [`[${entry.key}]`, ...cells]);
+    }
+
+    return entry.value;
   }
 }
 
-function getFormattedMessage(entry: Entry): string {
-  if (entry.level === LogLevel.ERROR) {
-    return formatMessage(entry.level, getErrorMessage(entry.value));
-  }
-
-  return formatMessage(entry.level, `${entry.value}`);
-}
-
-function getErrorMessage(value: unknown): string {
-  return value instanceof Error ? value.stack || value.message : `${value}`;
+function applyOptions(partial: Partial<Options>): Options {
+  const showKey = partial.showKey === undefined ? true : partial.showKey;
+  return {showKey};
 }
