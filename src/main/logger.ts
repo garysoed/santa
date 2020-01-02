@@ -1,4 +1,4 @@
-import commandLineUsage from 'command-line-usage';
+import * as commandLineUsage from 'command-line-usage';
 
 import { ArrayOfType, StringType, Type } from '@gs-types';
 import { Subject } from '@rxjs';

@@ -1,4 +1,4 @@
-import commandLineUsage from 'command-line-usage';
+import * as commandLineUsage from 'command-line-usage';
 
 import { LogLevel } from './log-level';
 
