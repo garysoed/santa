@@ -1,6 +1,6 @@
 import * as commandLineUsage from 'command-line-usage';
 
-import { ArrayOfType, StringType, Type } from '@gs-types';
+import { arrayOfType, StringType, Type } from '@gs-types';
 import { Subject } from '@rxjs';
 
 import { Entry, Value } from '../component/entry';
@@ -90,7 +90,7 @@ export class Logger {
   }
 }
 
-const STRING_ARRAY_TYPE: Type<readonly string[]> = ArrayOfType(StringType);
+const STRING_ARRAY_TYPE: Type<readonly string[]> = arrayOfType(StringType);
 
 function normalizeValue(raw: RawValue): Value {
   if (typeof raw === 'string') {
