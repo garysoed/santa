@@ -9,13 +9,20 @@ import { STRING_TABLE_TYPE } from '../string-table-type';
 
 import { colorize } from './colorize';
 
+interface Options {
+  readonly showPrefix: boolean;
+}
 
 interface RenderedRow {
   readonly prefix: string;
   [key: number]: string;
 }
 
-function formatRows(rows: ReadonlyArray<readonly string[]>, type: LogLevel): string {
+function formatRows(
+    rows: ReadonlyArray<readonly string[]>,
+    type: LogLevel,
+    showPrefix: boolean,
+): string {
   const renderedRows: RenderedRow[] = [];
   const cellMaxLengths: number[] = [];
   for (const cells of rows) {
@@ -43,12 +50,14 @@ function formatRows(rows: ReadonlyArray<readonly string[]>, type: LogLevel): str
     config[i] = {maxWidth: Math.floor(cellMaxLengths[i] / totalCellMaxLength * cliWidth)};
   }
 
+  const prefixColumn = showPrefix ? ['prefix'] : [];
+
   return colorize(
       type,
       columnify(
           renderedRows,
           {
-            columns: ['prefix', ...numberColumns],
+            columns: [...prefixColumn, ...numberColumns],
             config,
             preserveNewLines: true,
             showHeaders: false,
@@ -64,10 +73,20 @@ function formatRows(rows: ReadonlyArray<readonly string[]>, type: LogLevel): str
  * If the * message is an array of commandLineUsage Sections, they will be passed to
  * commandLineUsage with the appended prefix.
  */
-export function formatMessage(type: LogLevel, message: Value): string {
+export function formatMessage(
+    type: LogLevel,
+    message: Value,
+    rawOptions: Partial<Options> = {},
+): string {
+  const options = resolveOptions(rawOptions);
   if (STRING_TABLE_TYPE.check(message)) {
-    return formatRows(message, type);
+    return formatRows(message, type, options.showPrefix);
   }
 
   return commandLineUsage(message);
+}
+
+function resolveOptions(raw: Partial<Options>): Options {
+  const showPrefix = raw.showPrefix === undefined ? true : raw.showPrefix;
+  return {showPrefix};
 }

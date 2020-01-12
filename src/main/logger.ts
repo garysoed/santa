@@ -88,6 +88,10 @@ export class Logger {
   success(value: RawValue): void {
     this.log({level: LogLevel.SUCCESS, value});
   }
+
+  warning(value: RawValue): void {
+    this.log({level: LogLevel.WARNING, value});
+  }
 }
 
 const STRING_ARRAY_TYPE: Type<readonly string[]> = arrayOfType(StringType);
