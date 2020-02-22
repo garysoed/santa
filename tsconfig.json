@@ -13,11 +13,6 @@
     "noImplicitReturns": true,
     "noImplicitThis": true,
     "outDir": "out",
-    "paths": {
-      "@gs-types": ["node_modules/gs-types/export/index.ts"],
-      "@rxjs": ["node_modules/rxjs"],
-      "@rxjs/operators": ["node_modules/rxjs/operators"],
-    },
     "pretty": true,
     "sourceMap": true,
     "strict": true,

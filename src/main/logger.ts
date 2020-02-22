@@ -1,7 +1,6 @@
 import * as commandLineUsage from 'command-line-usage';
-
-import { arrayOfType, StringType, Type } from '@gs-types';
-import { Subject } from '@rxjs';
+import { arrayOfType, StringType, Type } from 'gs-types';
+import { Subject } from 'rxjs';
 
 import { Entry, Value } from '../component/entry';
 import { LogLevel } from '../component/log-level';

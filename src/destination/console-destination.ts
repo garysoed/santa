@@ -1,4 +1,4 @@
-import { stringType, tupleOfType, Type } from '@gs-types';
+import { stringType, tupleOfType, Type } from 'gs-types';
 
 import { Entry, Value } from '../component/entry';
 import { formatMessage } from '../util/cli/format-message';
