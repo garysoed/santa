@@ -58,7 +58,7 @@ export class Logger {
 
   log(newEntry: NewEntry): void {
     // Adds the context BEFORE logging.
-    if (newEntry.contextChange && newEntry.contextChange.type === 'add') {
+    if (newEntry.contextChange?.type === 'add') {
       CONTEXT.set(newEntry.contextChange.key, newEntry.contextChange.value);
     }
 
@@ -75,7 +75,7 @@ export class Logger {
     ON_LOG_$.next(entry);
 
     // Removes the context AFTER logging.
-    if (newEntry.contextChange && newEntry.contextChange.type === 'delete') {
+    if (newEntry.contextChange?.type === 'delete') {
       CONTEXT.set(newEntry.contextChange.key, newEntry.contextChange.value);
     }
   }
