@@ -17,7 +17,7 @@ type OptionsProvider = (entry: Entry) => Partial<Options>;
 const STRING_VALUE_TYPE: Type<[[string]]> =
     tupleOfType<[[string]]>([tupleOfType<[string]>([stringType])]);
 
-export class ConsoleDestination implements Destination {
+export class CliDestination implements Destination {
   constructor(
       private readonly optionsProvider: OptionsProvider = () => ({}),
   ) {}

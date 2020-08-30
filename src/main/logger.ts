@@ -29,6 +29,10 @@ interface NewEntry {
 export class Logger {
   constructor(private readonly key: string) {}
 
+  debug(value: RawValue): void {
+    this.log({level: LogLevel.DEBUG, value});
+  }
+
   error(error: Error): void {
     let value: string;
     if (error.stack) {

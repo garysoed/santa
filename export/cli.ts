@@ -1,1 +1,1 @@
-export { ConsoleDestination } from '../src/destination/console-destination';
+export { CliDestination } from '../src/destination/cli-destination';
