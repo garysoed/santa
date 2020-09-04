@@ -11,8 +11,10 @@ interface Options {
   readonly installTrigger: boolean;
 }
 
+const STORAGE_KEY = 'santa.enableLog';
+
 export class WebConsoleDestination implements Destination {
-  private enabled = false;
+  private enabled = !!localStorage.getItem(STORAGE_KEY);
   constructor(
       private readonly options: Partial<Options> = {},
   ) {
@@ -69,6 +71,7 @@ export class WebConsoleDestination implements Destination {
       santa: {
         setEnabled: (enabled: unknown) => {
           this.enabled = !!enabled;
+          localStorage.setItem(STORAGE_KEY, enabled ? 'true' : '');
         },
       },
     });
