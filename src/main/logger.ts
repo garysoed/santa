@@ -1,10 +1,7 @@
-import * as commandLineUsage from 'command-line-usage';
-import { arrayOfType, stringType, Type } from 'gs-types';
 import { Subject } from 'rxjs';
 
 import { Entry, Value } from '../component/entry';
 import { LogLevel } from '../component/log-level';
-import { STRING_TABLE_TYPE } from '../util/string-table-type';
 
 
 export const ON_LOG_$ = new Subject<Entry>();
@@ -17,46 +14,24 @@ interface ContextChange {
   value: string;
 }
 
-type RawValue = string|readonly string[]|
-    ReadonlyArray<readonly string[]>|commandLineUsage.Section[];
-
 interface NewEntry {
   readonly contextChange?: ContextChange;
   readonly level: LogLevel;
-  readonly value: RawValue;
+  readonly value: Value;
 }
 
 export class Logger {
   constructor(private readonly key: string) {}
 
-  debug(value: RawValue): void {
+  debug(...value: readonly unknown[]): void {
     this.log({level: LogLevel.DEBUG, value});
   }
 
   error(error: Error): void {
-    let value: string;
-    if (error.stack) {
-      value = error.stack
-          .split('\n')
-          .map((line, index) => {
-            if (index <= 0) {
-              return line;
-            }
-
-            return line.replace(
-                /^( )*/,
-                match => {
-                  return match.replace(/ /g, '.');
-                });
-          })
-          .join('\n');
-    } else {
-      value = error.message;
-    }
-    this.log({level: LogLevel.ERROR, value});
+    this.log({level: LogLevel.ERROR, value: [error]});
   }
 
-  info(value: RawValue): void {
+  info(...value: readonly unknown[]): void {
     this.log({level: LogLevel.INFO, value});
   }
 
@@ -66,14 +41,12 @@ export class Logger {
       CONTEXT.set(newEntry.contextChange.key, newEntry.contextChange.value);
     }
 
-    const value = normalizeValue(newEntry.value);
 
     const entry: Entry = {
       ...newEntry,
       context: CONTEXT,
       key: this.key,
       timestampMs: Date.now(),
-      value,
     };
 
     ON_LOG_$.next(entry);
@@ -84,33 +57,15 @@ export class Logger {
     }
   }
 
-  progress(value: RawValue): void {
+  progress(...value: readonly unknown[]): void {
     this.log({level: LogLevel.PROGRESS, value});
   }
 
-  success(value: RawValue): void {
+  success(...value: readonly unknown[]): void {
     this.log({level: LogLevel.SUCCESS, value});
   }
 
-  warning(value: RawValue): void {
+  warning(...value: readonly unknown[]): void {
     this.log({level: LogLevel.WARNING, value});
   }
-}
-
-const STRING_ARRAY_TYPE: Type<readonly string[]> = arrayOfType(stringType);
-
-function normalizeValue(raw: RawValue): Value {
-  if (typeof raw === 'string') {
-    return raw.split('\n').map(row => [row]);
-  }
-
-  if (STRING_ARRAY_TYPE.check(raw)) {
-    return raw.map(row => [row]);
-  }
-
-  if (STRING_TABLE_TYPE.check(raw)) {
-    return raw;
-  }
-
-  return raw;
 }

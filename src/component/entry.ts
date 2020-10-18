@@ -2,7 +2,7 @@ import * as commandLineUsage from 'command-line-usage';
 
 import { LogLevel } from './log-level';
 
-export type Value = ReadonlyArray<readonly string[]>|commandLineUsage.Section[];
+export type Value = readonly unknown[];
 
 /**
  * Entry in the log.
