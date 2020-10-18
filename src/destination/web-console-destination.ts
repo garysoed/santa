@@ -1,8 +1,5 @@
-import { BehaviorSubject, EMPTY, Observable } from 'rxjs';
-
 import { Entry } from '../component/entry';
 import { LogLevel } from '../component/log-level';
-import { STRING_TABLE_TYPE } from '../util/string-table-type';
 
 import { Destination } from './destination';
 
@@ -26,11 +23,10 @@ export class WebConsoleDestination implements Destination {
       return;
     }
 
-    const messageString = this.getMessageString(entry);
     switch (entry.level) {
       case LogLevel.DEBUG:
         // tslint:disable-next-line:no-console
-        console.debug(messageString);
+        console.debug(...entry.value);
         break;
       case LogLevel.ERROR:
         console.error(...entry.value);
@@ -51,14 +47,6 @@ export class WebConsoleDestination implements Destination {
         console.warn(...entry.value);
         break;
     }
-  }
-
-  private getMessageString(entry: Entry): string {
-    if (!STRING_TABLE_TYPE.check(entry.value)) {
-      return '(unsupported log format)';
-    }
-
-    return `[${entry.key}] ${entry.value.join(' ')}`;
   }
 
   private run(): void {
