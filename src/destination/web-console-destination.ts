@@ -26,25 +26,25 @@ export class WebConsoleDestination implements Destination {
     switch (entry.level) {
       case LogLevel.DEBUG:
         // tslint:disable-next-line:no-console
-        console.debug(...entry.value);
+        console.debug(entry.key, ...entry.value);
         break;
       case LogLevel.ERROR:
-        console.error(...entry.value);
+        console.error(entry.key, ...entry.value);
         break;
       case LogLevel.FAILURE:
-        console.warn(...entry.value);
+        console.warn(entry.key, ...entry.value);
         break;
       case LogLevel.INFO:
-        console.info(...entry.value);
+        console.info(entry.key, ...entry.value);
         break;
       case LogLevel.PROGRESS:
-        console.info(...entry.value);
+        console.info(entry.key, ...entry.value);
         break;
       case LogLevel.SUCCESS:
-        console.info(...entry.value);
+        console.info(entry.key, ...entry.value);
         break;
       case LogLevel.WARNING:
-        console.warn(...entry.value);
+        console.warn(entry.key, ...entry.value);
         break;
     }
   }
