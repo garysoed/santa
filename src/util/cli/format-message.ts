@@ -83,7 +83,7 @@ export function formatMessage(
     return formatRows(message, type, options.showPrefix);
   }
 
-  return commandLineUsage(message);
+  return commandLineUsage(message as any);
 }
 
 function resolveOptions(raw: Partial<Options>): Options {
