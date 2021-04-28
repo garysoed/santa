@@ -1,5 +1,5 @@
-import * as columnify from 'columnify';
-import * as commandLineUsage from 'command-line-usage';
+import columnify from 'columnify';
+import commandLineUsage from 'command-line-usage';
 import * as process from 'process';
 
 import { Value } from '../../component/entry';
