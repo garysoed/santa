@@ -11,7 +11,7 @@ declare({
   as: serial({
     cmds: [
       single({bin: 'eslint', flags: ['**/*.ts']}),
-      single({bin: 'git', flags: ['commit', '-am', argv => argv[0]]}),
+      single({bin: 'git', flags: ['commit', '-a']}),
     ],
   }),
 });
