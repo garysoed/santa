@@ -1,4 +1,4 @@
-import * as chalk from 'chalk';
+import chalk from 'chalk';
 
 import {LogLevel} from '../../component/log-level';
 
@@ -10,11 +10,11 @@ export function colorize(type: LogLevel, text: string): string {
     case LogLevel.DEBUG:
       return chalk.gray(text);
     case LogLevel.INFO:
-      return chalk.white(text);
+      return chalk.blue(text);
     case LogLevel.FAILURE:
       return chalk.red(text);
     case LogLevel.PROGRESS:
-      return chalk.cyan(text);
+      return chalk.white(text);
     case LogLevel.SUCCESS:
       return chalk.green.bold(text);
     case LogLevel.WARNING:

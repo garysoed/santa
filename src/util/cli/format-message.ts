@@ -1,21 +1,21 @@
 import * as process from 'process';
 
 import columnify from 'columnify';
-import commandLineUsage from 'command-line-usage';
 
-import {Value} from '../../component/entry';
 import {LogLevel} from '../../component/log-level';
 import {getSymbol} from '../get-symbol';
-import {STRING_TABLE_TYPE} from '../string-table-type';
 
 import {colorize} from './colorize';
 
+
 interface Options {
+  readonly key: string|null;
   readonly showPrefix: boolean;
 }
 
 interface RenderedRow {
-  readonly prefix: string;
+  readonly symbol: string;
+  readonly key: string|null;
   [key: number]: string;
 }
 
@@ -23,11 +23,15 @@ function formatRows(
     rows: ReadonlyArray<readonly string[]>,
     type: LogLevel,
     showPrefix: boolean,
+    key: string|null,
 ): string {
   const renderedRows: RenderedRow[] = [];
   const cellMaxLengths: number[] = [];
   for (const cells of rows) {
-    const renderedRow: RenderedRow = {prefix: `[${getSymbol(type)}]`};
+    const renderedRow: RenderedRow = {
+      symbol: `[${getSymbol(type)}]`,
+      key: `[${key}]`,
+    };
     for (let c = 0; c < cells.length; c++) {
       const cell = cells[c];
       const maxLength = cellMaxLengths[c] || 0;
@@ -51,7 +55,14 @@ function formatRows(
     config[i] = {maxWidth: Math.floor(cellMaxLengths[i] / totalCellMaxLength * cliWidth)};
   }
 
-  const prefixColumn = showPrefix ? ['prefix'] : [];
+  const prefixColumn = [];
+  if (showPrefix) {
+    prefixColumn.push('symbol');
+  }
+
+  if (key) {
+    prefixColumn.push('key');
+  }
 
   return colorize(
       type,
@@ -76,18 +87,13 @@ function formatRows(
  */
 export function formatMessage(
     type: LogLevel,
-    message: Value,
-    rawOptions: Partial<Options> = {},
+    message: ReadonlyArray<readonly string[]>,
+    options: Options,
 ): string {
-  const options = resolveOptions(rawOptions);
-  if (STRING_TABLE_TYPE.check(message)) {
-    return formatRows(message, type, options.showPrefix);
-  }
-
-  return commandLineUsage(message as any);
-}
-
-function resolveOptions(raw: Partial<Options>): Options {
-  const showPrefix = raw.showPrefix === undefined ? true : raw.showPrefix;
-  return {showPrefix};
+  return formatRows(
+      message,
+      type,
+      options.showPrefix,
+      options.key,
+  );
 }

@@ -1,9 +1,9 @@
 /* eslint-disable no-console */
-import {stringType, tupleOfType, Type} from 'gs-types';
+import {arrayOfType, instanceofType, stringType, tupleOfType, Type} from 'gs-types';
+import {stringify, Verbosity} from 'moirai';
 
-import {Entry, Value} from '../component/entry';
+import {Entry} from '../component/entry';
 import {formatMessage} from '../util/cli/format-message';
-import {STRING_TABLE_TYPE} from '../util/string-table-type';
 
 import {Destination} from './destination';
 
@@ -36,17 +36,31 @@ export class CliDestination implements Destination {
 
     return formatMessage(
         entry.level,
-        this.getMessageString(entry, options),
-        {showPrefix: options.showType},
+        this.getMessageString(entry),
+        {
+          showPrefix: options.showType,
+          key: options.showKey ? entry.key : null,
+        },
     );
   }
 
-  private getMessageString(entry: Entry, options: Options): Value {
-    if (options.showKey && STRING_TABLE_TYPE.check(entry.value)) {
-      return entry.value.map(cells => [`[${entry.key}]`, ...cells]);
+  private getMessageString(entry: Entry): ReadonlyArray<readonly string[]> {
+    if (arrayOfType(stringType).check(entry.value)) {
+      return entry.value.map(line => [line]);
     }
 
-    return entry.value;
+    if (arrayOfType(instanceofType(Error)).check(entry.value)) {
+      const err = entry.value[0];
+      return this.getMessageString({
+        ...entry,
+        value: [
+          err.stack ?? err.message,
+        ],
+      },
+      );
+    }
+
+    return entry.value.map(v => [stringify(v, Verbosity.QUIET)]);
   }
 }
 
