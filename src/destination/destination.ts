@@ -1,4 +1,4 @@
-import { Entry } from '../component/entry';
+import {Entry} from '../component/entry';
 
 /**
  * Destination of logging.

@@ -1,10 +1,11 @@
-import { stringType, tupleOfType, Type } from 'gs-types';
+/* eslint-disable no-console */
+import {stringType, tupleOfType, Type} from 'gs-types';
 
-import { Entry, Value } from '../component/entry';
-import { formatMessage } from '../util/cli/format-message';
-import { STRING_TABLE_TYPE } from '../util/string-table-type';
+import {Entry, Value} from '../component/entry';
+import {formatMessage} from '../util/cli/format-message';
+import {STRING_TABLE_TYPE} from '../util/string-table-type';
 
-import { Destination } from './destination';
+import {Destination} from './destination';
 
 
 interface Options {
@@ -24,7 +25,6 @@ export class CliDestination implements Destination {
 
   log(entry: Entry): void {
     const options = applyOptions(this.optionsProvider(entry));
-    // tslint:disable-next-line:no-console
     console.log(this.formatMessage(entry, options));
   }
 

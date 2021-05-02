@@ -1,7 +1,7 @@
-import { Subject } from 'rxjs';
+import {Subject} from 'rxjs';
 
-import { Entry, Value } from '../component/entry';
-import { LogLevel } from '../component/log-level';
+import {Entry, Value} from '../component/entry';
+import {LogLevel} from '../component/log-level';
 
 
 export const ON_LOG_$ = new Subject<Entry>();

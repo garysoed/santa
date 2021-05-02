@@ -1,6 +1,4 @@
-import * as commandLineUsage from 'command-line-usage';
-
-import { LogLevel } from './log-level';
+import {LogLevel} from './log-level';
 
 export type Value = readonly unknown[];
 

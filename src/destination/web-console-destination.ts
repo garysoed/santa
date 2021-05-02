@@ -1,7 +1,8 @@
-import { Entry } from '../component/entry';
-import { LogLevel } from '../component/log-level';
+/* eslint-disable no-console */
+import {Entry} from '../component/entry';
+import {LogLevel} from '../component/log-level';
 
-import { Destination } from './destination';
+import {Destination} from './destination';
 
 
 interface Options {
@@ -25,7 +26,6 @@ export class WebConsoleDestination implements Destination {
 
     switch (entry.level) {
       case LogLevel.DEBUG:
-        // tslint:disable-next-line:no-console
         console.debug(entry.key, ...entry.value);
         break;
       case LogLevel.ERROR:

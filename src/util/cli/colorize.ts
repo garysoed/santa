@@ -1,6 +1,6 @@
 import * as chalk from 'chalk';
 
-import { LogLevel } from '../../component/log-level';
+import {LogLevel} from '../../component/log-level';
 
 
 export function colorize(type: LogLevel, text: string): string {

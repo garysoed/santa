@@ -1,4 +1,4 @@
-import { LogLevel } from '../component/log-level';
+import {LogLevel} from '../component/log-level';
 
 export function getSymbol(type: LogLevel): string {
   switch (type) {

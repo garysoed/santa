@@ -1,13 +1,14 @@
-import columnify from 'columnify';
-import commandLineUsage from 'command-line-usage';
 import * as process from 'process';
 
-import { Value } from '../../component/entry';
-import { LogLevel } from '../../component/log-level';
-import { getSymbol } from '../get-symbol';
-import { STRING_TABLE_TYPE } from '../string-table-type';
+import columnify from 'columnify';
+import commandLineUsage from 'command-line-usage';
 
-import { colorize } from './colorize';
+import {Value} from '../../component/entry';
+import {LogLevel} from '../../component/log-level';
+import {getSymbol} from '../get-symbol';
+import {STRING_TABLE_TYPE} from '../string-table-type';
+
+import {colorize} from './colorize';
 
 interface Options {
   readonly showPrefix: boolean;
