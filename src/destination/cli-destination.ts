@@ -1,5 +1,5 @@
 /* eslint-disable no-console */
-import {arrayOfType, instanceofType, stringType, tupleOfType, Type} from 'gs-types';
+import {arrayOfType, instanceofType, stringType} from 'gs-types';
 import {stringify, Verbosity} from 'moirai';
 
 import {Entry} from '../component/entry';
@@ -15,8 +15,6 @@ interface Options {
 }
 
 type OptionsProvider = (entry: Entry) => Partial<Options>;
-const STRING_VALUE_TYPE: Type<[[string]]> =
-    tupleOfType<[[string]]>([tupleOfType<[string]>([stringType])]);
 
 export class CliDestination implements Destination {
   constructor(
@@ -30,8 +28,9 @@ export class CliDestination implements Destination {
 
   private formatMessage(entry: Entry, options: Options): string {
     if (!options.enableFormat) {
-      STRING_VALUE_TYPE.assert(entry.value);
-      return entry.value[0][0];
+      const value = entry.value[0];
+      stringType.assert(value);
+      return value;
     }
 
     return formatMessage(
