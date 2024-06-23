@@ -2,7 +2,6 @@ import chalk from 'chalk';
 
 import {LogLevel} from '../../component/log-level';
 
-
 export function colorize(type: LogLevel, text: string): string {
   switch (type) {
     case LogLevel.ERROR:

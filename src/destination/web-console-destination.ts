@@ -4,7 +4,6 @@ import {LogLevel} from '../component/log-level';
 
 import {Destination} from './destination';
 
-
 interface Options {
   readonly installTrigger: boolean;
 }
@@ -13,9 +12,7 @@ const STORAGE_KEY = 'santa.enableLog';
 
 export class WebConsoleDestination implements Destination {
   private enabled = !!localStorage.getItem(STORAGE_KEY);
-  constructor(
-      private readonly options: Partial<Options> = {},
-  ) {
+  constructor(private readonly options: Partial<Options> = {}) {
     this.run();
   }
 

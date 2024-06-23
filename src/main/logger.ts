@@ -3,14 +3,13 @@ import {Subject} from 'rxjs';
 import {Entry, Value} from '../component/entry';
 import {LogLevel} from '../component/log-level';
 
-
 export const ON_LOG_$ = new Subject<Entry>();
 
 const CONTEXT: Map<string, string> = new Map();
 
 interface ContextChange {
   key: string;
-  type: 'add'|'delete';
+  type: 'add' | 'delete';
   value: string;
 }
 
@@ -40,7 +39,6 @@ export class Logger {
     if (newEntry.contextChange?.type === 'add') {
       CONTEXT.set(newEntry.contextChange.key, newEntry.contextChange.value);
     }
-
 
     const entry: Entry = {
       ...newEntry,

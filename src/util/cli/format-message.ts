@@ -7,23 +7,22 @@ import {getSymbol} from '../get-symbol';
 
 import {colorize} from './colorize';
 
-
 interface Options {
-  readonly key: string|null;
+  readonly key: string | null;
   readonly showPrefix: boolean;
 }
 
 interface RenderedRow {
   readonly symbol: string;
-  readonly key: string|null;
+  readonly key: string | null;
   [key: number]: string;
 }
 
 function formatRows(
-    rows: ReadonlyArray<readonly string[]>,
-    type: LogLevel,
-    showPrefix: boolean,
-    key: string|null,
+  rows: ReadonlyArray<readonly string[]>,
+  type: LogLevel,
+  showPrefix: boolean,
+  key: string | null,
 ): string {
   const renderedRows: RenderedRow[] = [];
   const cellMaxLengths: number[] = [];
@@ -32,28 +31,34 @@ function formatRows(
       symbol: `[${getSymbol(type)}]`,
       key: `[${key}]`,
     };
-    for (let c = 0; c < cells.length; c++) {
-      const cell = cells[c];
+    cells.forEach((cell, c) => {
       const maxLength = cellMaxLengths[c] || 0;
       cellMaxLengths[c] = Math.max(maxLength, cell.length);
-      renderedRow[c] = cells[c];
-    }
+      renderedRow[c] = cell;
+    });
     renderedRows.push(renderedRow);
   }
 
-  const maxCols = rows.map(row => row.length).reduce((max, current) => Math.max(max, current), 0);
+  const maxCols = rows
+    .map((row) => row.length)
+    .reduce((max, current) => Math.max(max, current), 0);
   const numberColumns = [];
   for (let i = 0; i < maxCols; i++) {
     numberColumns.push(`${i}`);
   }
 
   // Compute the maxWidths by: cellMaxLength / totalCellMaxLength * (cliWidth - 4)
-  const totalCellMaxLength = cellMaxLengths.reduce((sum, current) => sum + current, 0);
+  const totalCellMaxLength = cellMaxLengths.reduce(
+    (sum, current) => sum + current,
+    0,
+  );
   const cliWidth = process.stdout.columns - 4;
   const config: Record<number, columnify.Options> = {};
-  for (let i = 0; i < cellMaxLengths.length; i++) {
-    config[i] = {maxWidth: Math.floor(cellMaxLengths[i] / totalCellMaxLength * cliWidth)};
-  }
+  cellMaxLengths.forEach((cellMaxLength, i) => {
+    config[i] = {
+      maxWidth: Math.floor((cellMaxLength / totalCellMaxLength) * cliWidth),
+    };
+  });
 
   const prefixColumn = [];
   if (showPrefix) {
@@ -65,18 +70,15 @@ function formatRows(
   }
 
   return colorize(
-      type,
-      columnify(
-          renderedRows,
-          {
-            columns: [...prefixColumn, ...numberColumns],
-            config,
-            preserveNewLines: true,
-            showHeaders: false,
-          }),
+    type,
+    columnify(renderedRows, {
+      columns: [...prefixColumn, ...numberColumns],
+      config,
+      preserveNewLines: true,
+      showHeaders: false,
+    }),
   );
 }
-
 
 /**
  * Formats message to be shown on the CLI.
@@ -86,14 +88,9 @@ function formatRows(
  * commandLineUsage with the appended prefix.
  */
 export function formatMessage(
-    type: LogLevel,
-    message: ReadonlyArray<readonly string[]>,
-    options: Options,
+  type: LogLevel,
+  message: ReadonlyArray<readonly string[]>,
+  options: Options,
 ): string {
-  return formatRows(
-      message,
-      type,
-      options.showPrefix,
-      options.key,
-  );
+  return formatRows(message, type, options.showPrefix, options.key);
 }

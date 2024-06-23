@@ -1,6 +1,5 @@
 import {Destination} from './destination';
 
-
 /**
  * Does nothing.
  */

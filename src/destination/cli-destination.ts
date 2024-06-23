@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 import {arrayOfType, instanceofType, stringType} from 'gs-types';
 import {stringify, Verbosity} from 'moirai';
 
@@ -6,7 +5,6 @@ import {Entry} from '../component/entry';
 import {formatMessage} from '../util/cli/format-message';
 
 import {Destination} from './destination';
-
 
 interface Options {
   readonly enableFormat: boolean;
@@ -17,12 +15,11 @@ interface Options {
 type OptionsProvider = (entry: Entry) => Partial<Options>;
 
 export class CliDestination implements Destination {
-  constructor(
-      private readonly optionsProvider: OptionsProvider = () => ({}),
-  ) {}
+  constructor(private readonly optionsProvider: OptionsProvider = () => ({})) {}
 
   log(entry: Entry): void {
     const options = applyOptions(this.optionsProvider(entry));
+    // eslint-disable-next-line no-console
     console.log(this.formatMessage(entry, options));
   }
 
@@ -33,38 +30,32 @@ export class CliDestination implements Destination {
       return value;
     }
 
-    return formatMessage(
-        entry.level,
-        this.getMessageString(entry),
-        {
-          showPrefix: options.showType,
-          key: options.showKey ? entry.key : null,
-        },
-    );
+    return formatMessage(entry.level, this.getMessageString(entry), {
+      showPrefix: options.showType,
+      key: options.showKey ? entry.key : null,
+    });
   }
 
   private getMessageString(entry: Entry): ReadonlyArray<readonly string[]> {
     if (arrayOfType(stringType).check(entry.value)) {
-      return entry.value.map(line => [line]);
+      return entry.value.map((line) => [line]);
     }
 
     if (arrayOfType(instanceofType(Error)).check(entry.value)) {
-      const err = entry.value[0];
+      const [err] = entry.value;
       return this.getMessageString({
         ...entry,
-        value: [
-          err.stack ?? err.message,
-        ],
-      },
-      );
+        value: [err?.stack ?? err?.message],
+      });
     }
 
-    return entry.value.map(v => [stringify(v, Verbosity.QUIET)]);
+    return entry.value.map((v) => [stringify(v, Verbosity.QUIET)]);
   }
 }
 
 function applyOptions(partial: Partial<Options>): Options {
-  const enableFormat = partial.enableFormat === undefined ? true : partial.enableFormat;
+  const enableFormat =
+    partial.enableFormat === undefined ? true : partial.enableFormat;
   const showKey = partial.showKey === undefined ? true : partial.showKey;
   const showType = partial.showType === undefined ? true : partial.showType;
   return {enableFormat, showKey, showType};
